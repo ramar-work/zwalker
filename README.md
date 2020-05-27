@@ -1,6 +1,6 @@
 # zwalker
 
-zwalker is a library for walking through blocks of memory.  It was built as a less buggy / more useful replacement for strstr and friends.  It is composed of two files and can be dropped into your project with little issue.
+zwalker is a library for walking through blocks of memory.  It was built as a less buggy / more useful replacement for strstr and friends.  It is composed of two files and can be dropped into your project with little issue. 
 
 
 ## Installation
@@ -108,3 +108,6 @@ jkl
 <!-- *memstrcpy (char *dest, const uint8_t *src, int32_t len); -->
 
 
+## Notes
+
+zwalker was extracted from a much larger library of mine called <a href="https://github.com/zaiah-dj/single">single.c</a>.  Much of that library has no use now, but this is one of the pieces that has found its way into my recent projects. 
