@@ -11,6 +11,72 @@ zwalker can be built with:
 	gcc -Wall -Werror -std=c99 zwalker.c main.c
 
 
+## Usage
+
+The examples below are lifted from main.c and show how to move through signed and unsigned character data.
+
+
+### Signed
+
+<pre>  
+#include "zwalker.h"
+#include <unistd.h> //needed for 'write'
+
+void print_blocks_from_signed_array() {
+	zWalker wstring;
+	const char string[] =
+		"abc;def; ghi;    jkl;";
+
+	//Initialize the zWalker structure 
+	memset( &wstring, 0, sizeof( zWalker ) );
+
+	//Loop through the string stopping at ';' and ' '
+	while ( strwalk( &wstring, string, "; " ) ) {
+		if ( wstring.chr == ' ' ) continue;
+		write( 2, &string[ wstring.pos ], wstring.size );
+		write( 2, "\n", 1 );
+	}
+}
+</pre>
+<pre>
+abc
+def
+ghi
+jkl
+</pre>
+
+
+### Unsigned
+
+<pre>
+#include "zwalker.h"
+#include <unistd.h> //needed for 'write'
+
+void print_blocks_from_unsigned_array() {
+	zWalker wbinary;
+	const unsigned char binary[] = "abc;def\0; ghi\0    jkl;";
+	uint8_t tokens[] = { ';', '\0', ' ' };
+	int tlen = 3;
+	int blen = sizeof( binary ) / sizeof( uint8_t );
+	memset( &wbinary, 0, sizeof( zWalker ) );
+	
+	while ( memwalk( &wbinary, binary, tokens, blen, tlen ) ) {
+		//Skip zero-length matches and extra spacing.
+		if ( wbinary.chr == ' ' || wbinary.size == 0 ) continue;
+		write( 2, &binary[ wbinary.pos ], wbinary.size );
+		write( 2, "\n", 1 );
+	}
+}
+</pre>
+
+<pre>
+abc
+def
+ghi
+jkl
+</pre>
+
+ 
 ## Reference
 
 memstr (const void * a, const void * b, int size);
@@ -28,7 +94,7 @@ Return the numeric position of a block 'b' within block 'a' of size 'size'.
 memchrat (const void * a, const char b, int size);
 Return the numeric position of a character 'b' within block 'a' of size 'size'.
 
-memwalk (Walker * w, const uint8_t * data, const uint8_t * tokens, int datalen, int toklen)
+memwalk (zWalker * w, const uint8_t * data, const uint8_t * tokens, int datalen, int toklen)
 Walks through a block 'data' according to the tokens specified in block 'tokens'.  Will return true when at the end of 'data'.
 
 <!-- memtok (const void * a, const uint8_t * tokens, int32_t rng, int32_t tlen); -->
@@ -36,9 +102,3 @@ Walks through a block 'data' according to the tokens specified in block 'tokens'
 <!-- *memstrcpy (char *dest, const uint8_t *src, int32_t len); -->
 
 
-## Usage
-
-zwalker uses its own little structure to keep track of its position within a block of data.
-
-See main.c for an example.
- 
