@@ -11,8 +11,8 @@ const unsigned char binary[] =
 int main (int argc, char *argv[]) {
 
 	//Moving through a signed char array is nothing...
-	Walker wstring;
-	memset( &wstring, 0, sizeof( Walker ) );
+	zWalker wstring;
+	memset( &wstring, 0, sizeof( zWalker ) );
 
 	fprintf( stderr, "STRING\n======\n" );
 	while ( strwalk( &wstring, string, "; " ) ) {
@@ -23,11 +23,11 @@ int main (int argc, char *argv[]) {
 
 
 	//Moving through an unsigned char array works the same way... just a bit more involved.
-	Walker wbinary;
+	zWalker wbinary;
 	uint8_t tokens[] = { ';', '\0', ' ' };
 	int tlen = 3;
 	int blen = sizeof( binary ) / sizeof( uint8_t );
-	memset( &wbinary, 0, sizeof( Walker ) );
+	memset( &wbinary, 0, sizeof( zWalker ) );
 	
 	fprintf( stderr, "BINARY\n======\n" );
 	while ( memwalk( &wbinary, binary, tokens, blen, tlen ) ) {

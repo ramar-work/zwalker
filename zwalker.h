@@ -21,7 +21,7 @@ typedef struct {
 	char  errmsg[ 127 ];
 	#endif 
  #endif
-} Walker;
+} zWalker;
 
 #define strwalk(a,b,c) \
  memwalk(a, (uint8_t *)b, (uint8_t *)c, strlen(b), strlen((char *)c))
@@ -40,6 +40,6 @@ int32_t memchrat (const void *, const char, int);
 int32_t memtok (const void *, const uint8_t *, int32_t, int32_t );
 int32_t memmatch (const void *, const char *, int32_t, char ); 
 char *memstrcpy (char *, const uint8_t *, int32_t );
-int memwalk (Walker *mm, const uint8_t *, const uint8_t *, int, int ) ;
+int memwalk (zWalker *mm, const uint8_t *, const uint8_t *, int, int ) ;
 
 #endif

@@ -74,7 +74,7 @@ int32_t memstrocc (const void *a, const void *b, int size) {
 
 
 //Initialize a block of memory
-int memwalk (Walker *w, const uint8_t *data, const uint8_t *tokens, int datalen, int toklen) {
+int memwalk (zWalker *w, const uint8_t *data, const uint8_t *tokens, int datalen, int toklen) {
 	int rc = 0;
 	w->pos = w->next;
 	w->size = memtok(&data[w->pos], tokens, datalen - (w->next - 1), toklen);
