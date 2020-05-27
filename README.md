@@ -8,7 +8,7 @@ zwalker is a library for walking through blocks of memory.  It was built as a le
 To keep things simple, this will probably never be packaged officially.  zwalker will build on any Unix based platform with whatever compiler you choose.
 
 zwalker can be built with:
-	gcc -Wall -Werror -std=c99 zwalker.c main.c
+	`gcc -Wall -Werror -std=c99 zwalker.c main.c`
 
 
 ## Usage
@@ -24,8 +24,7 @@ The examples below are lifted from main.c and show how to move through signed an
 
 void print_blocks_from_signed_array() {
 	zWalker wstring;
-	const char string[] =
-		"abc;def; ghi;    jkl;";
+	const char string[] = "abc;def; ghi;    jkl;";
 
 	//Initialize the zWalker structure 
 	memset( &wstring, 0, sizeof( zWalker ) );
@@ -38,6 +37,8 @@ void print_blocks_from_signed_array() {
 	}
 }
 </pre>
+
+Outputs
 <pre>
 abc
 def
@@ -53,13 +54,17 @@ jkl
 #include <unistd.h> //needed for 'write'
 
 void print_blocks_from_unsigned_array() {
+	//Define some data
 	zWalker wbinary;
 	const unsigned char binary[] = "abc;def\0; ghi\0    jkl;";
 	uint8_t tokens[] = { ';', '\0', ' ' };
 	int tlen = 3;
 	int blen = sizeof( binary ) / sizeof( uint8_t );
+
+	//Initialize the zWalker structure
 	memset( &wbinary, 0, sizeof( zWalker ) );
-	
+
+	//Loop through the binary block stopping at ';', '\0', and ' '	
 	while ( memwalk( &wbinary, binary, tokens, blen, tlen ) ) {
 		//Skip zero-length matches and extra spacing.
 		if ( wbinary.chr == ' ' || wbinary.size == 0 ) continue;
@@ -69,6 +74,7 @@ void print_blocks_from_unsigned_array() {
 }
 </pre>
 
+Outputs
 <pre>
 abc
 def
