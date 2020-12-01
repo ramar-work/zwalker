@@ -1,35 +1,71 @@
 /* ------------------------------------------- * 
  * zwalker.c
  * ---------
- * A less error prone way of iterating through
- * strings or unsigned character data.
+ * A less error prone way of iterating through strings and unsigned character
+ * data.
  *
  * Usage
  * -----
- * ### Building
  *
  *
  * LICENSE
  * -------
  * Copyright 2020 Tubular Modular Inc. dba Collins Design
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to 
+ * deal in the Software without restriction, including without limitation the 
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ * sell copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
  *
- * TODO
- * ----
- * 
+ * CHANGELOG 
+ * ---------
+ * 12-01-20 - Fixed a seek bug in memstr, adding tests
  * ------------------------------------------- */
 #include "zwalker.h"
 
+
+//Return count of occurences of a character in some block.
+int memchrocc (const void *a, const char b, int size) {
+	int occ = 0;
+	while ( --size ) {
+		*( (const unsigned char *)a++ ) == b ? occ++ : 0; 
+	}
+	return occ;
+}
+
+#include <stdio.h>
+
+//Where exactly is a character in memory
+int memchrat (const void *a, const char b, int size) {
+	int pos = 0, osize = size - 1;
+	while ( --size ) {
+		if ( *( (const unsigned char *)a++ ) == b ) {
+			return pos;
+		}
+		pos++;
+	}
+fprintf(stderr,"%d = %d\n", pos, osize );
+	return ( pos == osize ) ? -1 : pos;
+}
+
 int memstr (const void * a, const void *b, int size) {
-	int32_t ct=0, len = strlen((const char *)b);
-	const uint8_t *aa = (uint8_t *)a;
-	const uint8_t *bb = (uint8_t *)b;
-	_Bool stop=1;
+	int ct=0, len = strlen((const char *)b);
+	const unsigned char *aa = (unsigned char *)a;
+	const unsigned char *bb = (unsigned char *)b;
+	int stop=1;
 	while (stop) {
 		while ((stop = (ct < (size - len))) && memcmp(aa + ct, bb, 1) != 0) { 
 			//fprintf(stderr, "%c", aa[ct]);
@@ -41,27 +77,14 @@ int memstr (const void * a, const void *b, int size) {
 	return 0;	
 }
 
-//Return count of occurences of a character in some block.
-int32_t memchrocc (const void *a, const char b, int size) {
-	_Bool stop=1;
-	int32_t ct=0, occ=-1;
-	uint8_t *aa = (uint8_t *)a;
-	char bb[1] = { b };
-	while (stop) {
-		occ++;
-		while ((stop = (ct < size)) && memcmp(aa + ct, bb, 1) != 0) ct++;
-		ct++;
-	}
-	return occ;
-}
 
 
 //Return count of occurences of a string in some block.
-int32_t memstrocc (const void *a, const void *b, int size) {
-	_Bool stop=1;
-	int32_t ct=0, occ=0;
-	uint8_t *aa = (uint8_t *)a;
-	uint8_t *bb = (uint8_t *)b;
+int memstrocc (const void *a, const void *b, int size) {
+	int stop=1;
+	int ct=0, occ=0;
+	unsigned char *aa = (unsigned char *)a;
+	unsigned char *bb = (unsigned char *)b;
 	int len     = strlen((char *)b);
 	while (stop) {
 		while ((stop = (ct < (size - len))) && memcmp(aa + ct, bb, 1) != 0) ct++;
@@ -74,7 +97,7 @@ int32_t memstrocc (const void *a, const void *b, int size) {
 
 
 //Initialize a block of memory
-int memwalk (zWalker *w, const uint8_t *data, const uint8_t *tokens, int datalen, int toklen) {
+int memwalk (zWalker *w, const unsigned char *data, const unsigned char *tokens, int datalen, int toklen) {
 	int rc = 0;
 	w->pos = w->next;
 	w->size = memtok(&data[w->pos], tokens, datalen - (w->next - 1), toklen);
@@ -98,11 +121,11 @@ fprintf(stderr, "mm->size: %d\n", mm->size);
 
 
 //Where exactly is a substr in memory
-int32_t memstrat (const void *a, const void *b, int size)  {
-	_Bool stop=1;
-	int32_t ct=0;//, occ=0;
-	uint8_t *aa = (uint8_t *)a;
-	uint8_t *bb = (uint8_t *)b;
+int memstrat (const void *a, const void *b, int size)  {
+	int stop=1;
+	int ct=0;//, occ=0;
+	unsigned char *aa = (unsigned char *)a;
+	unsigned char *bb = (unsigned char *)b;
 	int len     = strlen((char *)b);
 	//while (stop = (ct < (size - len)) && memcmp(aa + ct, bb, len) != 0) ct++; 
 	while (stop) {
@@ -115,26 +138,16 @@ int32_t memstrat (const void *a, const void *b, int size)  {
 }
 
 
-//Where exactly is a substr in memory
-int32_t memchrat (const void *a, const char b, int size) {
-	_Bool stop=1;
-	int32_t ct=0;// occ=0;
-	uint8_t *aa = (uint8_t *)a;
-	//uint8_t *bb = (uint8_t *)b;
-	char bb[1] = { b };
-	//while (stop = (ct < (size - len)) && memcmp(aa + ct, bb, len) != 0) ct++; 
-	while ((stop = (ct < size)) && memcmp(aa + ct, bb, 1) != 0) ct++;
-	return (ct == size) ? -1 : ct;
-}
+
 
 
 //Finds the 1st occurence of one char, Keep running until no tokens are found in range...
-int32_t memtok (const void *a, const uint8_t *tokens, int32_t sz, int32_t tsz) {
-	int32_t p=-1,n;
+int memtok (const void *a, const unsigned char *tokens, int sz, int tsz) {
+	int n, p = -1;
 	
-	for (int i=0; i<tsz; i++)
+	for ( int i = 0; i < tsz; i++ ) {
 	#if 1
-		p = ((p > (n = memchrat(a, tokens[i], sz)) && n > -1) || p == -1) ? n : p;
+		p = ( ( p > ( n = memchrat(a, tokens[i], sz) ) && n > -1 ) || p == -1 ) ? n : p;
 	#else
 	{
 		p = ((p > (n = memchrat(a, tokens[i], sz)) && n > -1) || p == -1) ? n : p;
@@ -142,6 +155,7 @@ int32_t memtok (const void *a, const uint8_t *tokens, int32_t sz, int32_t tsz) {
 		nmprintf("p is", p);
 	}
 	#endif
+	}
 	
 	return p;
 }
@@ -149,8 +163,8 @@ int32_t memtok (const void *a, const uint8_t *tokens, int32_t sz, int32_t tsz) {
 
 //Finds the first occurrence of a complete token (usually a string). 
 //keep running until no more tokens are found.
-int32_t memmatch (const void *a, const char *tokens, int32_t sz, char delim) {
-	int32_t p=-1, n, occ = -1;
+int memmatch (const void *a, const char *tokens, int sz, char delim) {
+	int p=-1, n, occ = -1;
 
 	/*Check that the user has supplied a delimiter. (or fail in the future)*/
 	if (!(occ = memchrocc(tokens, delim, strlen(tokens))))
@@ -162,7 +176,7 @@ int32_t memmatch (const void *a, const char *tokens, int32_t sz, char delim) {
 	memset(&buf, 0, strlen(tokens) - occ);
 
 	/*Loop through each string in the token list*/
-	while (t < strlen(tokens) && (n = memtok(&tokens[t], (uint8_t *)"|\0", sz, 2)) > -1) {
+	while (t < strlen(tokens) && (n = memtok(&tokens[t], (unsigned char *)"|\0", sz, 2)) > -1) {
 		/*Copy to an empty buffer*/
 		memcpy(buf, &tokens[t], n);
 		buf[n] = '\0';
@@ -178,7 +192,7 @@ int32_t memmatch (const void *a, const char *tokens, int32_t sz, char delim) {
 
 
 /*Copy strings*/
-char *memstrcpy (char *dest, const uint8_t *src, int32_t len) {
+char *memstrcpy (char *dest, const unsigned char *src, int len) {
 	memcpy(dest, src, len);
 	dest[len]='\0';
 	return dest;
