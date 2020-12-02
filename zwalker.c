@@ -113,7 +113,7 @@ int memwalk ( zWalker *w
 	w->pos = w->next;
 
 	//Find the tokens specified, and bring back that position
-	while ( w->next++ < datalen && !memchr( tokens, *(w->ptr++), toklen ) ) ;
+	while ( ++w->next < datalen && !memchr( tokens, *(w->ptr++), toklen ) ) ;
 
 	//Die if no tokens were found
 	if ( w->next == datalen ) {
