@@ -51,7 +51,8 @@ typedef struct {
          next,  //Next position
          size,  //Size of something
 	         it;
-	uint8_t chr;  //Character found
+	unsigned char chr;  //Character found
+	unsigned char *ptr;  //Position of our character
  #ifndef ERR_H
   int error;
 	#ifndef ERRV_H
@@ -67,7 +68,7 @@ typedef struct {
  Mem mems; \
  memset(&mems, 0, sizeof(Mem)); \
  mems.pos = p; \
- mems.it = m; 
+ mems.it = m;
 
 #define memstrocc(blk,str,blklen) \
 	memblkocc( blk, str, blklen, strlen( str ) )

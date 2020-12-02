@@ -100,34 +100,43 @@ int memblkocc (const void *a, const void *b, int size_a, int size_b ) {
 }
 
 
-//Walk through data
+//Walk through unsigned character data 
 int memwalk ( 
 		zWalker *w
-	, const unsigned char *data
-	, const unsigned char *tokens
-	, int datalen
-	, int toklen ) 
+	, const unsigned char * data
+	, const unsigned char * tokens
+	, const int datalen
+	, const int toklen )
 {
-	int rc = 0;
+	//Setup the structure
+	w->ptr = (unsigned char *)( !w->ptr ? data : w->ptr );
 	w->pos = w->next;
-	w->size = memtok( &data[ w->pos ], tokens, datalen - ( w->next - 1 ), toklen );
-	if ( w->size == -1 ) {
-		w->size = datalen - w->next;
-	}
-	w->next += w->size + 1;
-	//rc = ((w->size > -1) && (w->pos <= datalen));
-	rc = (w->size > -1);
-	w->chr = !rc ? 0 : data[w->next - 1];
-	w->pos += w->it;
-	w->size -= w->it;
+
+	//Find the tokens specified, and bring back that position
+	while ( w->next++ < datalen && !memchr( tokens, *(w->ptr++), toklen ) ) ;
+
+	//Die if no tokens were found
+	if ( w->next == datalen ) {
+		//fprintf(stderr, "No tokens found, stopping.\n" );
+		return 0;
+	}	
+
+	//TODO: If you want to include the token, specify it...
+	w->size = w->next - w->pos;
+	w->chr = *( w->ptr - 1 );
 #if 0
-fprintf(stderr, "rc: %d\n", rc);
-fprintf(stderr, "datalen: %d\n", datalen);
-fprintf(stderr, "mm->pos: %d\n", mm->pos);
-fprintf(stderr, "mm->size: %d\n", mm->size);
+	fprintf(stderr, "I found a token: '%c'\n", w->chr );
+	fprintf(stderr, "position (current position in the string): %d\n", w->pos );
+	fprintf(stderr, "next (position after the token): %d\n", w->next );
+	fprintf(stderr, "size of workable block: %d\n", w->size );
 #endif
-	return rc; 
+	return 1; 
 }
+
+
+void zwalker_init( zWalker *w ) {
+	memset( w, 0, sizeof( zWalker ) );
+} 
 
 
 

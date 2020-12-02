@@ -49,7 +49,7 @@ const char string[] =
 	"abc;def; ghi;    jkl;";
 
 const unsigned char binary[] =
-	"abc;jkl\0; ghi\0    jkl;";
+	"abc;jkl\0; ghi\t    jkl;";
 
 const unsigned char edge1[] =
 	";abc def  ghi_ __ jkl\0";
@@ -124,7 +124,6 @@ int main (int argc, char *argv[]) {
 		singles++;
 	}
 	
-#if 1
 	//These have a string equivalent as well
 	fprintf( stderr, "\nMULTI CHARACTER LOOKUPS\n======\n" );
 	BinTest *multi = single_char; 
@@ -155,12 +154,10 @@ int main (int argc, char *argv[]) {
 
 		multi++;
 	}
-#endif
 
-#if 1
+
 	//Moving through a signed char array is nothing...
-	zWalker wstring;
-	memset( &wstring, 0, sizeof( zWalker ) );
+	zWalker wstring = {0}; 
 
 	fprintf( stderr, "STRING\n======\n" );
 	while ( strwalk( &wstring, string, "; " ) ) {
@@ -170,21 +167,17 @@ int main (int argc, char *argv[]) {
 	}
 
 
-	//Moving through an unsigned char array works the same way... just a bit more involved.
-	zWalker wbinary;
-	uint8_t tokens[] = { ';', '\0', ' ' };
-	int tlen = 3;
-	int blen = sizeof( binary ) / sizeof( uint8_t );
-	memset( &wbinary, 0, sizeof( zWalker ) );
-	
-	fprintf( stderr, "BINARY\n======\n" );
-	while ( memwalk( &wbinary, binary, tokens, blen, tlen ) ) {
+	//Moving through unsigned data is the same w/ the exception of additonal info
+	zWalker wbinary = {0};
+	unsigned char tokens[] = { ';', '\0', '\t', ' ' };
+	int blen = sizeof( binary ) / sizeof( unsigned char );
+
+	fprintf( stderr, "\nBINARY\n======\n" );
+	while ( memwalk( &wbinary, binary, tokens, blen, sizeof(tokens) ) ) {
 		if ( wbinary.chr == ' ' ) continue;
-		if ( wbinary.size == 0 ) continue;
 		write( 2, &binary[ wbinary.pos ], wbinary.size );
 		write( 2, "\n", 1 );
 	}
-#endif
 
 	return 0;
 }
