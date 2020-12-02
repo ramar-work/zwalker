@@ -40,10 +40,10 @@ void print_blocks_from_signed_array() {
 
 Outputs
 <pre>
-abc
-def
-ghi
-jkl
+abc;
+def;
+ghi;
+jkl;
 </pre>
 
 
@@ -51,7 +51,7 @@ jkl
 
 <pre>
 #include "zwalker.h"
-#include <unistd.h> //needed for 'write'
+#include &lt;unistd.h&gt; //needed for 'write'
 
 void print_blocks_from_unsigned_array() {
 	//Define some data
@@ -85,27 +85,38 @@ jkl
  
 ## Reference
 
-`memstr (const void * a, const void * b, int size)`
-- Safely searches for a block 'b' in a block 'a' of size 'size'.
+`memchrat (const void * a, const char b, int size)`
+- Return the numeric position of a character 'b' within block 'a' of size 'size'.
 
 `memchrocc (const void * a, const char b, int size)`
 - Get the count of occurrences of a character 'b' in block 'a' of size 'size'.
 
-`memstrocc (const void * a, const void * b, int size)`
-- Get the count of occurrences of a block 'b' in block 'a' of size 'size'.
+`memstr (const void * a, const void * b, int size)`
+- Safely searches for a zero-terminated string 'b' in a block 'a' of size 'size'.
 
 `memstrat (const void * a, const void * b, int size)`
-- Return the numeric position of a block 'b' within block 'a' of size 'size'.
+- Return the numeric position of a zero-terminated string 'b' within block 'a' of size 'size'.
 
-`memchrat (const void * a, const char b, int size)`
-- Return the numeric position of a character 'b' within block 'a' of size 'size'.
+`memstrocc (const void * a, const void * b, int size)`
+- Get the count of occurrences of a zero-terminated stirng 'b' in block 'a' of size 'size'.
+
+`memblk (const void * a, const void * b, int size_a, int size_b )`
+- Safely searches for unsigned character block 'b' designated by size 'size_b' in a block 'a' of size 'size_a'.
+
+`memblkat (const void * a, const void * b, int size_a, int size_b )`
+- Return the numeric position of unsigned character block 'b' designated by size 'size_b' within block 'a' of size 'size_a'.
+
+`memblkocc (const void * a, const void * b, int size_a, int size_b )`
+- Get the count of occurrences of unsigned character block 'b' designated by size 'size_b' in block 'a' of size 'size_a'.
+
+`strwalk (zWalker * w, const char * data, const char * tokens )`
+- Walks through a zero-terminated string 'data' according to the tokens specified in zero-terminated string 'tokens'.  Returns 1 when at the end of 'data'.
 
 `memwalk (zWalker * w, const uint8_t * data, const uint8_t * tokens, int datalen, int toklen)`
-- Walks through a block 'data' according to the tokens specified in block 'tokens'.  Will return true when at the end of 'data'.
+- Walks through unsigned character block 'data' according to the tokens specified in unsigned character block 'tokens'.  Returns 1 when at the end of 'data'.
 
-<!-- memtok (const void * a, const uint8_t * tokens, int32_t rng, int32_t tlen); -->
-<!-- memmatch (const void * a, const char * tokens, int32_t sz, char delim);  -->
-<!-- *memstrcpy (char *dest, const uint8_t *src, int32_t len); -->
+`memjump (zWalker * w, const uint8_t * data, const uint8_t ** tokens, int datalen, int * toklen)`
+- Walks through unsigned character block 'data' according to the tokens specified in unsigned character array 'tokens'.  'toklen' denotes an array of integers containing the size of each token.  Returns 1 when at the end of 'data'.
 
 
 ## Notes
