@@ -181,7 +181,7 @@ int main (int argc, char *argv[]) {
 	, NULL
 	};
 
-	while ( memjump( &wmulti, binary, stokens, sizeof(binary)/sizeof(uint8_t), stoken_lens ) ) {
+	while ( memjump( &wmulti, binary, stokens, sizeof(binary)/sizeof(unsigned char), stoken_lens ) ) {
 		//write( 2, &binary[ wmulti.pos ], wmulti.size );
 		//write( 2, "\n", 1 ); 
 		if ( !memcmp( wmulti.rptr, ";", 1 ) )
