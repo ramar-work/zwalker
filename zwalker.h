@@ -47,19 +47,39 @@
 #define ZWALKER_H
 
 typedef struct {
-	int     pos,  //Position
-         next,  //Next position
-         size,  //Size of something
-	         it;
-	unsigned char chr;  //Character found
-	unsigned char *ptr;  //Position of our character
- #ifndef ERR_H
+	//Current position within user's block
+	int pos;  
+
+	//Position of character found
+  int next;
+
+	//Size of block between current position and character position
+  int size;  
+
+	//Options
+	int keep_token;
+
+	//...
+	int rsize;
+  
+	//Character found
+	unsigned char chr; 
+
+	//Internal pointers
+	unsigned char *ptr, *rptr;
+
+#ifndef ERR_H
   int error;
-	#ifndef ERRV_H
+ #ifndef ERRV_H
 	char  errmsg[ 127 ];
-	#endif 
- #endif
+ #endif 
+#endif
 } zWalker;
+
+enum zWalkerToken {
+	ZWALKER_KEEP_TOKEN = 0
+, ZWALKER_DISCARD_TOKEN
+};
 
 #define strwalk(a,b,c) \
  memwalk(a, (uint8_t *)b, (uint8_t *)c, strlen(b), strlen((char *)c))
@@ -93,8 +113,12 @@ int memtok (const void *, const uint8_t *, int32_t, int32_t );
 
 int memmatch (const void *, const char *, int32_t, char ); 
 
-int memwalk (zWalker *, const uint8_t *, const uint8_t *, int, int ) ;
+int memwalk (zWalker *, const uint8_t *, const uint8_t *, const int, const int ) ;
 
-char *memstrcpy (char *, const uint8_t *, int32_t );
+void zwalker_discard_tokens( zWalker * );
+
+void zwalker_init( zWalker * );
+
+int memjump (zWalker *, const uint8_t *, const uint8_t **, const int, const int * ) ;
 
 #endif

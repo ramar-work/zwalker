@@ -74,27 +74,19 @@ BinTest single_char[] = {
 };
 
 
-#if 0
-const char easy_arrows[] = 
-	"abcdefghi << zoom";
-
-const char edge_arrows[] = 
-	"abcdefghi <<";
-
-const char no_arrows[] = 
-	"abcdefghi dfsafdfsdfsddf<";
-#endif
-
 char * status_on_code( int num ) {
 	return num ? "T" : "F";
 }
+
 
 char * status_on_null( void * n ) {
 	return n ? "T" : "F";
 }
 
+
 int main (int argc, char *argv[]) {
 
+#if 1
 	//Let's build upon memchr, etc first
 	fprintf( stderr, "\nSINGLE CHARACTER LOOKUPS\n======\n" );
 	BinTest *singles = single_char; 
@@ -177,6 +169,26 @@ int main (int argc, char *argv[]) {
 		if ( wbinary.chr == ' ' ) continue;
 		write( 2, &binary[ wbinary.pos ], wbinary.size );
 		write( 2, "\n", 1 );
+	}
+#endif
+
+	//Let's also try moving through data based on strings
+	zWalker wmulti = {0};
+	int stoken_lens[] = { 1, 3 };
+	const unsigned char * stokens[] = {
+		(unsigned char * )";"
+	, (unsigned char * )"jkl"
+	, NULL
+	};
+
+	while ( memjump( &wmulti, binary, stokens, sizeof(binary)/sizeof(uint8_t), stoken_lens ) ) {
+		//write( 2, &binary[ wmulti.pos ], wmulti.size );
+		//write( 2, "\n", 1 ); 
+		if ( !memcmp( wmulti.rptr, ";", 1 ) )
+			fprintf( stderr, "got semi (;)\n" );
+		else if ( !memcmp( wmulti.rptr, "jkl", 3 ) ) {
+			fprintf( stderr, "got multi (jkl)\n" );
+		}
 	}
 
 	return 0;

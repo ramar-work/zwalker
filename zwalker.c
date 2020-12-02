@@ -124,6 +124,7 @@ int memwalk (
 	//TODO: If you want to include the token, specify it...
 	w->size = w->next - w->pos;
 	w->chr = *( w->ptr - 1 );
+	w->rptr = w->ptr - 1;
 #if 0
 	fprintf(stderr, "I found a token: '%c'\n", w->chr );
 	fprintf(stderr, "position (current position in the string): %d\n", w->pos );
@@ -133,13 +134,79 @@ int memwalk (
 	return 1; 
 }
 
+#include <unistd.h>
+#include <stdio.h>
 
+//"Jump" through unsigned character data (by looking for blocks larger than one character)
+int memjump (
+		zWalker *w
+	, const unsigned char * data
+	, const unsigned char ** tokens
+	, const int datalen
+	, const int * toklen )
+{
+	//Setup the structure
+	w->ptr = (unsigned char *)( !w->ptr ? data : w->ptr );
+	w->pos = w->next;
+	w->rsize = 0;
+
+	//Find the tokens specified, and bring back that position
+	int match = 0;
+	while ( ( w->next < datalen ) && !match ) {
+		const unsigned char **t = tokens;
+		const int *l = toklen;
+		while ( *t ) {
+			//Skip the token if it's too big
+			if ( *l > ( datalen - w->next ) ) {
+				t++, l++;
+				continue;
+			}
+
+			//Move up and report our match if we found one
+			if ( memchr( *t, *w->ptr, *l ) && memcmp( *t, w->ptr, *l ) == 0 ) {
+				w->next += *l, w->ptr += *l, match = 1, w->rsize = *l;
+				break;	
+			}
+			t++, l++;
+		}
+
+		if ( match ) {
+			break;
+		}
+
+		w->ptr++, w->next++;
+	}
+
+	//Die if no tokens were found
+	if ( w->next == datalen ) {
+		return 0;
+	}	
+
+	//TODO: If you want to include the token, specify it...
+	w->size = w->next - w->pos;
+	w->chr = *( w->ptr - 1 );
+	w->rptr = w->ptr - w->rsize;
+	
+	return 1;
+}
+
+
+//Initialize a zWalker structure
 void zwalker_init( zWalker *w ) {
 	memset( w, 0, sizeof( zWalker ) );
 } 
 
 
+//Return one less than the size of the block found
+void zwalker_discard_tokens( zWalker *w ) {
+	w->keep_token = ZWALKER_DISCARD_TOKEN;	
+}
 
+
+//...
+
+
+#if 0
 //Finds the 1st occurence of one char, Keep running until no tokens are found in range...
 int memtok (const void *a, const unsigned char *tokens, int sz, int tsz) {
 	int n, p = -1;
@@ -188,11 +255,5 @@ int memmatch (const void *a, const char *tokens, int sz, char delim) {
 	}
 	return p;
 }
+#endif
 
-
-//Copy a block of memory into a zero-terminated string
-char *memstrcpy (char *dest, const unsigned char *src, int len) {
-	memcpy( dest, src, len );
-	dest[ len ] = '\0';
-	return dest;
-}
