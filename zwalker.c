@@ -33,9 +33,10 @@
  * CHANGELOG 
  * ---------
  * 12-01-20 - Fixed a seek bug in memstr, adding tests
+ *          - Added memblk functions. 
+ * 
  * ------------------------------------------- */
 #include "zwalker.h"
-
 
 //Return count of occurences of a character in some block.
 int memchrocc (const void *a, const char b, int size) {
@@ -46,63 +47,72 @@ int memchrocc (const void *a, const char b, int size) {
 	return occ;
 }
 
-#include <stdio.h>
 
 //Where exactly is a character in memory
 int memchrat (const void *a, const char b, int size) {
 	int pos = 0, osize = size - 1;
 	while ( --size ) {
-		if ( *( (const unsigned char *)a++ ) == b ) {
+		if ( *( (unsigned char *)a++ ) == b ) {
 			return pos;
 		}
 		pos++;
 	}
-fprintf(stderr,"%d = %d\n", pos, osize );
 	return ( pos == osize ) ? -1 : pos;
 }
 
-int memstr (const void * a, const void *b, int size) {
-	int ct=0, len = strlen((const char *)b);
-	const unsigned char *aa = (unsigned char *)a;
-	const unsigned char *bb = (unsigned char *)b;
-	int stop=1;
-	while (stop) {
-		while ((stop = (ct < (size - len))) && memcmp(aa + ct, bb, 1) != 0) { 
-			//fprintf(stderr, "%c", aa[ct]);
-			ct++; continue; }
-		if (memcmp(aa + ct, bb, len) == 0)
-			return 1;	
-		ct++;
+
+//Find a specific string in memory
+void * memblk (const void *a, const void *b, int size_a, int size_b) {
+	while ( --size_a > size_b ) {
+		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
+			return (void *)a;
+		}
+		a++; 
 	}
-	return 0;	
+	return NULL;	
 }
 
 
+//Where exactly is a substr in memory
+int memblkat (const void *a, const void *b, int size_a, int size_b) {
+	int pos = 0;
+	while ( --size_a > size_b ) {
+		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
+			return pos;
+		}
+		a++, pos++;
+	}
+	return -1;	
+}
+
 
 //Return count of occurences of a string in some block.
-int memstrocc (const void *a, const void *b, int size) {
-	int stop=1;
-	int ct=0, occ=0;
-	unsigned char *aa = (unsigned char *)a;
-	unsigned char *bb = (unsigned char *)b;
-	int len     = strlen((char *)b);
-	while (stop) {
-		while ((stop = (ct < (size - len))) && memcmp(aa + ct, bb, 1) != 0) ct++;
-		if (memcmp(aa + ct, bb, len) == 0) occ++;
-		ct++;
+int memblkocc (const void *a, const void *b, int size_a, int size_b ) {
+	int occ = 0;
+	while ( size_a > size_b ) {
+		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
+			occ++, a += size_b, size_a -= size_b;
+			continue;	
+		}
+		a++, size_a--; 
 	}
 	return occ;
 }
 
 
-
-//Initialize a block of memory
-int memwalk (zWalker *w, const unsigned char *data, const unsigned char *tokens, int datalen, int toklen) {
+//Walk through data
+int memwalk ( 
+		zWalker *w
+	, const unsigned char *data
+	, const unsigned char *tokens
+	, int datalen
+	, int toklen ) 
+{
 	int rc = 0;
 	w->pos = w->next;
-	w->size = memtok(&data[w->pos], tokens, datalen - (w->next - 1), toklen);
-	if (w->size == -1) {
-	 w->size = datalen - w->next;
+	w->size = memtok( &data[ w->pos ], tokens, datalen - ( w->next - 1 ), toklen );
+	if ( w->size == -1 ) {
+		w->size = datalen - w->next;
 	}
 	w->next += w->size + 1;
 	//rc = ((w->size > -1) && (w->pos <= datalen));
@@ -118,26 +128,6 @@ fprintf(stderr, "mm->size: %d\n", mm->size);
 #endif
 	return rc; 
 }
-
-
-//Where exactly is a substr in memory
-int memstrat (const void *a, const void *b, int size)  {
-	int stop=1;
-	int ct=0;//, occ=0;
-	unsigned char *aa = (unsigned char *)a;
-	unsigned char *bb = (unsigned char *)b;
-	int len     = strlen((char *)b);
-	//while (stop = (ct < (size - len)) && memcmp(aa + ct, bb, len) != 0) ct++; 
-	while (stop) {
-		while ((stop = (ct < (size - len))) && memcmp(aa + ct, bb, 1) != 0) ct++;
-		if (memcmp(aa + ct, bb, len) == 0)
-			return ct; 
-		ct++;
-	}
-	return -1;
-}
-
-
 
 
 
@@ -191,9 +181,9 @@ int memmatch (const void *a, const char *tokens, int sz, char delim) {
 }
 
 
-/*Copy strings*/
+//Copy a block of memory into a zero-terminated string
 char *memstrcpy (char *dest, const unsigned char *src, int len) {
-	memcpy(dest, src, len);
-	dest[len]='\0';
+	memcpy( dest, src, len );
+	dest[ len ] = '\0';
 	return dest;
 }

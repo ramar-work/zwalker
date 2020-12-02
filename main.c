@@ -1,17 +1,55 @@
+/* ------------------------------------------- * 
+ * main.c
+ * ---------
+ * Tests for zwalker library 
+ *
+ * Usage
+ * -----
+ * ./zwalker-test <no options needed>
+ *
+ * LICENSE
+ * -------
+ * Copyright 2020 Tubular Modular Inc. dba Collins Design
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to 
+ * deal in the Software without restriction, including without limitation the 
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ * sell copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * THE SOFTWARE.
+ *
+ * CHANGELOG 
+ * ---------
+ * 12-01-20 - Fixed a seek bug in memstr, adding tests
+ *          - Added memblk functions. 
+ * 
+ * ------------------------------------------- */
+#include "zwalker.h"
 #include "zwalker.h"
 #include <stdio.h>
 #include <unistd.h>
 
-typedef struct StringTest {
+typedef struct BinTest {
 	const unsigned char *content; 
 	const unsigned int len;
-} StringTest;
+} BinTest;
 
 const char string[] =
 	"abc;def; ghi;    jkl;";
 
 const unsigned char binary[] =
-	"abc;def\0; ghi\0    jkl;";
+	"abc;jkl\0; ghi\0    jkl;";
 
 const unsigned char edge1[] =
 	";abc def  ghi_ __ jkl\0";
@@ -20,16 +58,18 @@ const unsigned char edge2[] =
 	"abc def  ghi>>>> jkl;";
 
 const unsigned char edge3[] =
-	{ 'a', 'b', 'c', 'd', 'e', 'f' };
-	//"abc def  ghi>>>> jkl_";
+	"jkljklf  ghi>>>> jkl";
 
+const unsigned char edge4[] =
+	{ 'a', 'b', 'c', 'd', 'e', 'f', 'j', 'k' };
 
-StringTest single_char[] = {
+BinTest single_char[] = {
 	{ (const unsigned char *)string, sizeof( string ) }
 , { binary, sizeof( binary ) }
 , { edge1, sizeof( edge1 ) }
 , { edge2, sizeof( edge2 ) }
 , { edge3, sizeof( edge3 ) }
+, { edge4, sizeof( edge4 ) }
 , { NULL }
 };
 
@@ -57,7 +97,7 @@ int main (int argc, char *argv[]) {
 
 	//Let's build upon memchr, etc first
 	fprintf( stderr, "\nSINGLE CHARACTER LOOKUPS\n======\n" );
-	StringTest *singles = single_char; 
+	BinTest *singles = single_char; 
 
 	while ( singles->content ) {
 		int status = 0;
@@ -84,36 +124,40 @@ int main (int argc, char *argv[]) {
 		singles++;
 	}
 	
+#if 1
 	//These have a string equivalent as well
-
-#if 0
-	//We can also do some basic substring work 
-	fprintf( stderr, "\nSUBSTRINGS\n======\n" );
-	const char **arrows = (const char *[] ){ 
-		easy_arrows
-	, edge_arrows
-	, no_arrows
-	, NULL
-	};
+	fprintf( stderr, "\nMULTI CHARACTER LOOKUPS\n======\n" );
+	BinTest *multi = single_char; 
 	
-	while ( *arrows ) {
+	while ( multi->content ) {
 		int status = 0;
-		const char *arrow = "<<";
-		char big[ 2048 ] = { 0 };
-		
-		sprintf( big, "Is the substring '%s' present in '%s'", arrow, *arrows );
-		status = memstr( *arrows, arrow, strlen( *arrows ) ); 
-		fprintf( stderr, "%-70s %s\n", big, status ? "T" : "F" );
+		char *c = "jkl";
+		int len = strlen( c );
+	
+		//See the block
+		fprintf( stderr, "Block: '" );
+		write( 2, multi->content, multi->len );
+		write( 2, "'\n", 2 );
 
-		sprintf( big, "Find the position of substring %s in '%s':", arrow, *arrows );
-		status = memstrat( *arrows, arrow, strlen( *arrows ) ); 
-		fprintf( stderr, "%-70s %d\n", big, status ); 
+		//Does the string exist?
+		fprintf( stderr, "Does the string '%s' exist in block? ", c );
+		fprintf( stderr, "%s\n", status_on_null( memblk( multi->content, c, multi->len, len )) );
 
-		arrows++;
-	}	
+		//Where is the string?
+		fprintf( stderr, "Position of '%s' in block: ", c );
+		status = memblkat( multi->content, c, multi->len, len );
+		fprintf( stderr, "%d\n", status );
+
+		//How many are there?
+		fprintf( stderr, "Occurrences of '%s' in block: ", c );
+		status = memblkocc( multi->content, c, multi->len, len );
+		fprintf( stderr, "%d\n\n", status );
+
+		multi++;
+	}
 #endif
 
-#if 0
+#if 1
 	//Moving through a signed char array is nothing...
 	zWalker wstring;
 	memset( &wstring, 0, sizeof( zWalker ) );
@@ -141,9 +185,6 @@ int main (int argc, char *argv[]) {
 		write( 2, "\n", 1 );
 	}
 #endif
-
-
-	//These will also work with memory
 
 	return 0;
 }
