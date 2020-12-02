@@ -64,7 +64,7 @@ int memchrat (const void *a, const char b, int size) {
 
 //Find a specific string in memory
 void * memblk (const void *a, const void *b, int size_a, int size_b) {
-	while ( size_a > size_b ) {
+	while ( size_a >= size_b ) {
 		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
 			return (void *)a;
 		}
@@ -77,7 +77,7 @@ void * memblk (const void *a, const void *b, int size_a, int size_b) {
 //Where exactly is a substr in memory
 int memblkat (const void *a, const void *b, int size_a, int size_b) {
 	int pos = 0;
-	while ( size_a > size_b ) {
+	while ( size_a >= size_b ) {
 		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
 			return pos;
 		}
@@ -90,7 +90,7 @@ int memblkat (const void *a, const void *b, int size_a, int size_b) {
 //Return count of occurences of a string in some block.
 int memblkocc (const void *a, const void *b, int size_a, int size_b ) {
 	int occ = 0;
-	while ( size_a > size_b ) {
+	while ( size_a >= size_b ) {
 		if ( *(unsigned char *)a == *(unsigned char *)b && !memcmp(a, b, size_b) ) {
 			occ++, a += size_b, size_a -= size_b;
 			continue;	

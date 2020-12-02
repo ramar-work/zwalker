@@ -57,7 +57,8 @@ const unsigned char edge2[] =
 	"abc def  ghi>>>> jkl;";
 
 const unsigned char edge3[] =
-	"jkljklf  ghi>>>> jkl";
+	{ 'j', 'k', 'l', 'j', 'k', 'l', 'f', ' ', ' ', 'g'
+	, 'h', 'i', '>', '>', '>', '>', ' ', 'j', 'k', 'l' };
 
 const unsigned char edge4[] =
 	{ 'a', 'b', 'c', 'd', 'e', 'f', 'j', 'k' };
