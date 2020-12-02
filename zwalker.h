@@ -34,6 +34,7 @@
  * ---------
  * 12-01-20 - Added memblk functions. 
  *          - Added #define aliases for memblk functions. 
+ *          - Added memjump function.
  *
  * ------------------------------------------- */
 #ifndef _WIN32

@@ -20,7 +20,7 @@ The examples below are lifted from main.c and show how to move through signed an
 
 <pre>  
 #include "zwalker.h"
-#include <unistd.h> //needed for 'write'
+#include &lt;unistd.h&gt; //needed for 'write'
 
 void print_blocks_from_signed_array() {
 	zWalker wstring;

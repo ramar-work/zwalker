@@ -31,9 +31,8 @@
  *
  * CHANGELOG 
  * ---------
- * 12-01-20 - Fixed a seek bug in memstr, adding tests
- *          - Added memblk functions. 
- * 
+ * Added tests for all main user functions, not just memwalk and co.
+ *  
  * ------------------------------------------- */
 #include "zwalker.h"
 #include "zwalker.h"
