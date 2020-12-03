@@ -172,6 +172,7 @@ int main (int argc, char *argv[]) {
 	}
 #endif
 
+#if 0
 	//Let's also try moving through data based on strings
 	zWalker wmulti = {0};
 	int stoken_lens[] = { 1, 3 };
@@ -190,6 +191,7 @@ int main (int argc, char *argv[]) {
 			fprintf( stderr, "got multi (jkl)\n" );
 		}
 	}
+#endif
 
 	return 0;
 }
